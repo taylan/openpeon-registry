@@ -25,7 +25,7 @@
       "sound_count": 31,
       "total_size_bytes": 2506838,
       "source_repo": "PeonPing/og-packs",
-      "source_ref": "v1.0.0",
+      "source_ref": "v1.1.0",
       "source_path": "acolyte_de",
       "manifest_sha256": "74d4953f5053c3d2f9423b7bd1af224a596d5d66d842951cd0d67ea0d31d2f34",
       "tags": [
@@ -421,7 +421,7 @@
       "sound_count": 7,
       "total_size_bytes": 70354,
       "source_repo": "PeonPing/og-packs",
-      "source_ref": "v1.0.0",
+      "source_ref": "v1.1.0",
       "source_path": "murloc",
       "manifest_sha256": "e9b5c431d0fcc907d7992634c6636188d533fd7e90370018c803d89528680153",
       "tags": [
@@ -459,7 +459,7 @@
       "sound_count": 13,
       "total_size_bytes": 755172,
       "source_repo": "PeonPing/og-packs",
-      "source_ref": "v1.0.0",
+      "source_ref": "v1.1.0",
       "source_path": "ocarina_of_time",
       "manifest_sha256": "56094abe0d6e975c7a05c48dd64ca2cb5dd33e543fa93611a3030f7835bffecb",
       "tags": [
@@ -778,7 +778,7 @@
       "sound_count": 27,
       "total_size_bytes": 1013804,
       "source_repo": "PeonPing/og-packs",
-      "source_ref": "v1.0.0",
+      "source_ref": "v1.1.0",
       "source_path": "peon_de",
       "manifest_sha256": "2fd9c89497333efc0c1ddac317d23b0b715d7d29e9744f4105ee189b04253e57",
       "tags": [
