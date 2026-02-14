@@ -160,6 +160,40 @@
       "updated": "2026-02-14"
     },
     {
+      "name": "aom-greeks",
+      "display_name": "Age of Mythology - Greeks",
+      "version": "1.0.0",
+      "description": "Ancient Greek dialogue lines from Age of Mythology villagers, soldiers, and heroes",
+      "author": {
+        "name": "Konstantinos Diamantidis",
+        "github": "kdmnt"
+      },
+      "trust_tier": "community",
+      "categories": [
+        "session.start",
+        "task.acknowledge",
+        "task.complete",
+        "task.error",
+        "input.required",
+        "resource.limit",
+        "task.progress",
+        "user.spam",
+        "session.end"
+      ],
+      "language": "el",
+      "license": "CC-BY-NC-4.0",
+      "sound_count": 35,
+      "total_size_bytes": 380216,
+      "source_repo": "kdmnt/aom-greeks",
+      "source_ref": "v1.0.0",
+      "source_path": ".",
+      "manifest_sha256": "c9dc36a7ce808a0215de8272edf6bd06acbcc3ab894b073d93d1e44a51ff9cfb",
+      "tags": ["gaming", "age-of-mythology", "ancient-greek", "greek"],
+      "preview_sounds": ["villager-male-move-vulome.mp3"],
+      "added": "2026-02-14",
+      "updated": "2026-02-14"
+    },
+    {
       "name": "aom_greek",
       "display_name": "Age of Mythology - Greek Villager",
       "version": "1.0.0",
