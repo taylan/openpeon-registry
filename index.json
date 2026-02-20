@@ -2501,6 +2501,46 @@
       "updated": "2026-02-12"
     },
     {
+      "name": "sc_marine",
+      "display_name": "StarCraft Marine",
+      "version": "1.0.0",
+      "description": "StarCraft Marine sound pack \u2014 iconic lines including 'Rock 'n' roll!' and 'You want a piece of me, boy?'",
+      "author": {
+        "name": "harrymunro",
+        "github": "harrymunro"
+      },
+      "trust_tier": "official",
+      "categories": [
+        "session.start",
+        "task.acknowledge",
+        "task.complete",
+        "task.error",
+        "input.required",
+        "resource.limit",
+        "user.spam"
+      ],
+      "language": "en",
+      "license": "CC-BY-NC-4.0",
+      "sound_count": 16,
+      "total_size_bytes": 329257,
+      "source_repo": "PeonPing/og-packs",
+      "source_ref": "v1.2.0",
+      "source_path": "sc_marine",
+      "manifest_sha256": "ff50155f9a8741268ca8d97ff8f8c65c7e7004e7faf1e71da5994f451066ffd6",
+      "tags": [
+        "gaming",
+        "starcraft",
+        "blizzard",
+        "rts"
+      ],
+      "preview_sounds": [
+        "YouWannaPieceOfMe.mp3",
+        "RockAndRoll.mp3"
+      ],
+      "added": "2026-02-20",
+      "updated": "2026-02-20"
+    },
+    {
       "name": "sc_medic",
       "display_name": "StarCraft Medic",
       "version": "1.0.0",
@@ -2540,27 +2580,30 @@
     {
       "name": "sc_scv",
       "display_name": "StarCraft SCV",
-      "version": "1.0.0",
-      "description": "StarCraft SCV sound pack from StarCraft",
+      "version": "2.0.0",
+      "description": "StarCraft SCV sound pack \u2014 expanded with 19 sounds across all 7 CESP categories",
       "author": {
-        "name": "workdd",
-        "github": "workdd"
+        "name": "harrymunro",
+        "github": "harrymunro"
       },
       "trust_tier": "official",
       "categories": [
         "session.start",
         "task.acknowledge",
         "task.complete",
-        "input.required"
+        "task.error",
+        "input.required",
+        "resource.limit",
+        "user.spam"
       ],
       "language": "en",
       "license": "CC-BY-NC-4.0",
-      "sound_count": 8,
-      "total_size_bytes": 139424,
+      "sound_count": 19,
+      "total_size_bytes": 414515,
       "source_repo": "PeonPing/og-packs",
-      "source_ref": "v1.0.0",
+      "source_ref": "v1.2.0",
       "source_path": "sc_scv",
-      "manifest_sha256": "c8336067ff6a8d2283793aa5470437fca410216d15ecff7c5a9fcaa5259b2d39",
+      "manifest_sha256": "012352bc93f2f722fa2e39574e90ec488f8c827712c6da884966e07ea495a7ec",
       "tags": [
         "gaming",
         "starcraft",
@@ -2572,7 +2615,7 @@
         "GoodToGoSir.mp3"
       ],
       "added": "2026-02-12",
-      "updated": "2026-02-12"
+      "updated": "2026-02-20"
     },
     {
       "name": "sc_tank",
@@ -3022,49 +3065,49 @@
       "added": "2026-02-16",
       "updated": "2026-02-16"
     },
-     {
-  "name": "tf2_demoman",
-  "display_name": "TF2 Demoman",
-  "version": "1.0.0",
-  "description": "TF2 Demoman sound pack from Team Fortress 2",
-  "author": {
-    "name": "Breadcat",
-    "github": "thebreadcat"
-  },
-  "trust_tier": "community",
-  "categories": [
-    "session.start",
-    "session.end",
-    "task.acknowledge",
-    "task.progress",
-    "task.complete",
-    "task.error",
-    "input.required",
-    "resource.limit",
-    "user.spam"
-  ],
-  "language": "en",
-  "license": "CC-BY-NC-4.0",
-  "sound_count": 67,
-  "total_size_bytes": 2920947,
-  "source_repo": "thebreadcat/openpeon-tf2-demoman",
-  "source_ref": "v1.0.0",
-  "source_path": ".",
-  "manifest_sha256": "5fe0b7ea4e1b0f4e6486403400b714f7d186a456e62ff210691626ed33f1a1f0",
-  "tags": [
-    "gaming",
-    "tf2",
-    "valve",
-    "fps"
-  ],
-  "preview_sounds": [
-    "demoman_battlecry01.mp3",
-    "demoman_goodjob01.mp3",
-    "demoman_autoonfire01.mp3"
-  ],
-  "added": "2026-02-19",
-  "updated": "2026-02-19"
-},
+    {
+      "name": "tf2_demoman",
+      "display_name": "TF2 Demoman",
+      "version": "1.0.0",
+      "description": "TF2 Demoman sound pack from Team Fortress 2",
+      "author": {
+        "name": "Breadcat",
+        "github": "thebreadcat"
+      },
+      "trust_tier": "community",
+      "categories": [
+        "session.start",
+        "session.end",
+        "task.acknowledge",
+        "task.progress",
+        "task.complete",
+        "task.error",
+        "input.required",
+        "resource.limit",
+        "user.spam"
+      ],
+      "language": "en",
+      "license": "CC-BY-NC-4.0",
+      "sound_count": 67,
+      "total_size_bytes": 2920947,
+      "source_repo": "thebreadcat/openpeon-tf2-demoman",
+      "source_ref": "v1.0.0",
+      "source_path": ".",
+      "manifest_sha256": "5fe0b7ea4e1b0f4e6486403400b714f7d186a456e62ff210691626ed33f1a1f0",
+      "tags": [
+        "gaming",
+        "tf2",
+        "valve",
+        "fps"
+      ],
+      "preview_sounds": [
+        "demoman_battlecry01.mp3",
+        "demoman_goodjob01.mp3",
+        "demoman_autoonfire01.mp3"
+      ],
+      "added": "2026-02-19",
+      "updated": "2026-02-19"
+    },
     {
       "name": "tf2_engineer",
       "display_name": "TF2 Engineer",
@@ -3106,50 +3149,50 @@
       "updated": "2026-02-12"
     },
     {
-  "name": "tf2_heavy",
-  "display_name": "TF2 Heavy",
-  "version": "1.0.0",
-  "description": "TF2 Heavy sound pack from Team Fortress 2",
-  "author": {
-    "name": "Breadcat",
-    "github": "thebreadcat"
-  },
-  "trust_tier": "community",
-  "categories": [
-    "session.start",
-    "session.end",
-    "task.acknowledge",
-    "task.progress",
-    "task.complete",
-    "task.error",
-    "input.required",
-    "resource.limit",
-    "user.spam"
-  ],
-  "language": "en",
-  "license": "CC-BY-NC-4.0",
-  "sound_count": 113,
-  "total_size_bytes": 5222535,
-  "source_repo": "thebreadcat/tf2-heavy-pack",
-  "source_ref": "v1.0.0",
-  "source_path": ".",
-  "manifest_sha256": "3bf5c407fa3bd703762d4de2e9ab6eb6d92cf8283d69e6b6cbcdfdc9a8cc6c4c",
-  "tags": [
-    "gaming",
-    "tf2",
-    "valve",
-    "fps",
-    "heavy"
-  ],
-  "preview_sounds": [
-    "heavy_go01.mp3",
-    "heavy_thanks01.mp3",
-    "heavy_goodjob02.mp3",
-    "heavy_battlecry03.mp3"
-  ],
-  "added": "2026-02-19",
-  "updated": "2026-02-19"
-},
+      "name": "tf2_heavy",
+      "display_name": "TF2 Heavy",
+      "version": "1.0.0",
+      "description": "TF2 Heavy sound pack from Team Fortress 2",
+      "author": {
+        "name": "Breadcat",
+        "github": "thebreadcat"
+      },
+      "trust_tier": "community",
+      "categories": [
+        "session.start",
+        "session.end",
+        "task.acknowledge",
+        "task.progress",
+        "task.complete",
+        "task.error",
+        "input.required",
+        "resource.limit",
+        "user.spam"
+      ],
+      "language": "en",
+      "license": "CC-BY-NC-4.0",
+      "sound_count": 113,
+      "total_size_bytes": 5222535,
+      "source_repo": "thebreadcat/tf2-heavy-pack",
+      "source_ref": "v1.0.0",
+      "source_path": ".",
+      "manifest_sha256": "3bf5c407fa3bd703762d4de2e9ab6eb6d92cf8283d69e6b6cbcdfdc9a8cc6c4c",
+      "tags": [
+        "gaming",
+        "tf2",
+        "valve",
+        "fps",
+        "heavy"
+      ],
+      "preview_sounds": [
+        "heavy_go01.mp3",
+        "heavy_thanks01.mp3",
+        "heavy_goodjob02.mp3",
+        "heavy_battlecry03.mp3"
+      ],
+      "added": "2026-02-19",
+      "updated": "2026-02-19"
+    },
     {
       "name": "tf2_spy",
       "display_name": "TF2 Spy",
