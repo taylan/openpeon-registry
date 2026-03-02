@@ -399,7 +399,7 @@ jobs:
               print(f"\nAll {len(packs)} pack(s) validated successfully")
           PYEOF
 
-      - name: Audio quality check
+      - name: Validate audio quality
         id: quality
         if: always() && steps.detect.outcome == 'success'
         run: |
@@ -458,6 +458,12 @@ jobs:
                                           dst.write(src.read())
 
                   os.unlink(tmp.name)
+                  # Debug: show extracted contents
+                  for root, dirs, files in os.walk(pack_dir):
+                      for fname in files:
+                          fpath = os.path.join(root, fname)
+                          rel = os.path.relpath(fpath, pack_dir)
+                          print(f"  extracted: {rel}")
               except Exception as e:
                   print(f"  Download failed: {e}")
                   all_results.append({'pack_name': name, 'error': f'download failed: {e}', 'verdict': 'REJECTED'})
@@ -473,6 +479,13 @@ jobs:
                    '--quiet'],
                   capture_output=True, text=True, timeout=300
               )
+
+              if result.returncode != 0:
+                  print(f"  quality-check.py exit code: {result.returncode}")
+                  if result.stderr:
+                      print(f"  stderr: {result.stderr[:500]}")
+                  if result.stdout:
+                      print(f"  stdout: {result.stdout[:500]}")
 
               try:
                   with open(f'quality_{name}.json') as f:
