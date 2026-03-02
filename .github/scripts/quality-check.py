@@ -219,7 +219,7 @@ def classify_file(filepath):
         stats["lufs"] = round(lufs, 1) if lufs != float("-inf") else "-inf"
         # loudnorm needs >= 400ms to compute integrated loudness (ITU-R BS.1770).
         # Files shorter than that report -inf, which is not a real silence reading.
-        if lufs == float("-inf") and duration < 0.4:
+        if lufs == float("-inf") and duration < 0.5:
             pass  # skip — too short for reliable loudness measurement
         elif lufs == float("-inf") or lufs < LUFS_BLOCK_FLOOR:
             blocks.append(f"file is silent or nearly silent")
