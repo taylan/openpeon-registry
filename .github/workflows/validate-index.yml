@@ -693,7 +693,7 @@ jobs:
                       if verdict == 'REJECTED':
                           lines.append("**Warnings** — not blocking, but recommended to address:\n")
                       else:
-                          lines.append("**Warnings** — pack is accepted, but consider addressing these in a future release:\n")
+                          lines.append("**Warnings** — pack is accepted, but please consider addressing these in a future release:\n")
                       # Group warnings by type for a cleaner summary
                       warn_groups = {}
                       for wf in warned_files:

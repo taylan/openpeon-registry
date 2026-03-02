@@ -164,19 +164,19 @@ def classify_file(filepath):
 
     # Duration
     if duration > DURATION_MAX_BLOCK_S:
-        blocks.append(f"duration {duration:.1f}s (max {DURATION_MAX_BLOCK_S}s)")
+        blocks.append(f"too long ({duration:.1f}s, max {DURATION_MAX_BLOCK_S:.0f}s)")
     if duration < DURATION_MIN_BLOCK_S:
-        blocks.append(f"duration {duration:.2f}s (min {DURATION_MIN_BLOCK_S}s)")
+        blocks.append(f"too short ({duration:.2f}s, min {DURATION_MIN_BLOCK_S}s)")
 
     # Sample rate
     if sample_rate < SAMPLE_RATE_BLOCK_HZ:
-        blocks.append(f"sample rate {sample_rate} Hz (min {SAMPLE_RATE_BLOCK_HZ} Hz)")
+        blocks.append(f"very low audio quality (sample rate {sample_rate} Hz, min {SAMPLE_RATE_BLOCK_HZ} Hz)")
     elif sample_rate < SAMPLE_RATE_WARN_HZ:
-        warns.append(f"low sample rate {sample_rate} Hz")
+        warns.append(f"low audio quality (sample rate {sample_rate} Hz)")
 
     # Bitrate (lossy only)
     if codec in ("mp3", "vorbis", "opus", "aac") and 0 < br_kbps < BITRATE_WARN_KBPS:
-        warns.append(f"low bitrate {br_kbps} kbps")
+        warns.append(f"low audio quality (bitrate {br_kbps} kbps)")
 
     # Silence analysis
     intervals = silence_intervals(filepath)
@@ -186,9 +186,9 @@ def classify_file(filepath):
         lead_ms = int(intervals[0][1] * 1000)
         stats["leading_silence_ms"] = lead_ms
         if lead_ms > LEADING_SILENCE_BLOCK_MS:
-            blocks.append(f"leading silence {lead_ms} ms (max {LEADING_SILENCE_BLOCK_MS} ms)")
+            blocks.append(f"too much silence at the start ({lead_ms} ms)")
         elif lead_ms > LEADING_SILENCE_WARN_MS:
-            warns.append(f"leading silence {lead_ms} ms")
+            warns.append(f"silence at the start ({lead_ms} ms)")
 
     # Trailing silence: last interval extends to EOF
     if intervals and duration > 0:
@@ -202,27 +202,27 @@ def classify_file(filepath):
             trail_ms = int((duration - last_start) * 1000)
             stats["trailing_silence_ms"] = trail_ms
             if trail_ms > TRAILING_SILENCE_BLOCK_MS:
-                blocks.append(f"trailing silence {trail_ms} ms (max {TRAILING_SILENCE_BLOCK_MS} ms)")
+                blocks.append(f"too much silence at the end ({trail_ms} ms)")
             elif trail_ms > TRAILING_SILENCE_WARN_MS:
-                warns.append(f"trailing silence {trail_ms} ms")
+                warns.append(f"silence at the end ({trail_ms} ms)")
 
     # Loudness + peak
     tp, lufs = loudnorm_stats(filepath)
     if tp is not None:
         stats["true_peak_dbtp"] = round(tp, 1) if tp != float("-inf") else "-inf"
         if tp >= CLIP_BLOCK_DBTP:
-            blocks.append(f"clipping: true peak +{tp:.1f} dBTP (max +{CLIP_BLOCK_DBTP} dBTP)")
+            blocks.append(f"audio is distorted (clipping at +{tp:.1f} dBTP)")
         elif tp >= CLIP_WARN_DBTP:
-            warns.append(f"hot signal: true peak {tp:+.1f} dBTP")
+            warns.append(f"volume is very high, may sound distorted on some devices")
 
     if lufs is not None:
         stats["lufs"] = round(lufs, 1) if lufs != float("-inf") else "-inf"
         if lufs == float("-inf") or lufs < LUFS_BLOCK_FLOOR:
-            blocks.append(f"near-silent: {lufs} LUFS")
+            blocks.append(f"file is silent or nearly silent")
         elif lufs < LUFS_QUIET_WARN:
-            warns.append(f"quiet: {lufs:.1f} LUFS")
+            warns.append(f"very quiet compared to other sounds")
         elif lufs > LUFS_LOUD_WARN:
-            warns.append(f"loud: {lufs:.1f} LUFS")
+            warns.append(f"very loud compared to other sounds")
 
     return {"file": fname, "blocks": blocks, "warns": warns, "stats": stats}
 
@@ -302,36 +302,34 @@ def check_pack(pack_dir):
         total_warns += len(result["warns"])
 
         for b in result["blocks"]:
-            if "clipping" in b:
-                block_summary["clipping"] += 1
-            elif "leading silence" in b:
-                block_summary["leading_silence"] += 1
-            elif "trailing silence" in b:
-                block_summary["trailing_silence"] += 1
-            elif "near-silent" in b:
-                block_summary["near_silent"] += 1
-            elif "duration" in b:
+            if "distorted" in b:
+                block_summary["distorted"] += 1
+            elif "silence at the start" in b:
+                block_summary["silence_at_start"] += 1
+            elif "silence at the end" in b:
+                block_summary["silence_at_end"] += 1
+            elif "silent or nearly silent" in b:
+                block_summary["silent"] += 1
+            elif "too long" in b or "too short" in b:
                 block_summary["duration"] += 1
-            elif "sample rate" in b:
-                block_summary["sample_rate"] += 1
+            elif "audio quality" in b:
+                block_summary["low_quality"] += 1
             else:
                 block_summary["other"] += 1
 
         for w in result["warns"]:
-            if "quiet" in w:
-                warn_summary["quiet"] += 1
-            elif "loud" in w:
-                warn_summary["loud"] += 1
-            elif "leading silence" in w:
-                warn_summary["leading_silence"] += 1
-            elif "trailing silence" in w:
-                warn_summary["trailing_silence"] += 1
-            elif "hot signal" in w:
-                warn_summary["hot_signal"] += 1
-            elif "bitrate" in w:
-                warn_summary["low_bitrate"] += 1
-            elif "sample rate" in w:
-                warn_summary["low_sample_rate"] += 1
+            if "very quiet" in w:
+                warn_summary["very_quiet"] += 1
+            elif "very loud" in w:
+                warn_summary["very_loud"] += 1
+            elif "silence at the start" in w:
+                warn_summary["silence_at_start"] += 1
+            elif "silence at the end" in w:
+                warn_summary["silence_at_end"] += 1
+            elif "volume is very high" in w:
+                warn_summary["high_volume"] += 1
+            elif "audio quality" in w:
+                warn_summary["low_quality"] += 1
             else:
                 warn_summary["other"] += 1
 
