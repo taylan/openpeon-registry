@@ -443,7 +443,9 @@ jobs:
               pack_dir = tempfile.mkdtemp(prefix=f"qc-{name}-")
               try:
                   tmp = tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False)
-                  urllib.request.urlretrieve(tarball_url, tmp.name)
+                  resp = urllib.request.urlopen(tarball_url, timeout=60)
+                  with open(tmp.name, 'wb') as dl:
+                      dl.write(resp.read())
 
                   with tarfile.open(tmp.name, "r:gz") as tf:
                       members = tf.getmembers()
@@ -521,6 +523,16 @@ jobs:
           else:
               print("\nAll packs passed quality check")
           PYEOF
+
+      - name: Upload quality results
+        if: always() && steps.quality.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-results
+          path: |
+            quality_results.json
+            quality_*.md
+          retention-days: 90
 
       - name: Write verdict
         if: always()
