@@ -636,8 +636,8 @@ jobs:
                   ok_count = sum(1 for a in audio if a.get('ok'))
                   total = len(audio)
                   status = 'pass' if ok_count == total else 'FAIL'
-                  files = ', '.join(a['file'] for a in audio)
-                  lines.append(f"| Audio spot-check ({name}) | {status} ({ok_count}/{total}: {files}) |")
+                  file_list = '<br>'.join(f'• {a["file"]}' for a in audio)
+                  lines.append(f"| Audio spot-check ({name}) | {status} ({ok_count}/{total})<br>{file_list} |")
 
           lines.append(f"| Audio quality | {'pass' if quality_ok else 'FAIL'} |")
           lines.append("")
@@ -720,13 +720,13 @@ jobs:
                   lines.append("<details><summary>Threshold reference</summary>\n")
                   lines.append("| Check | Block | Warn |")
                   lines.append("|---|---|---|")
-                  lines.append("| True peak (clipping) | >= +1.0 dBTP | >= -0.5 dBTP |")
-                  lines.append("| Leading silence | > 2000 ms | > 500 ms |")
-                  lines.append("| Trailing silence | > 2000 ms | > 500 ms |")
+                  lines.append("| Volume (true peak) | — | >= -0.5 dBTP |")
+                  lines.append("| Dead air at start | > 2000 ms | > 500 ms |")
+                  lines.append("| Dead air at end | > 2000 ms | > 500 ms |")
                   lines.append("| Loudness (LUFS) | < -70.0 | < -35.0 or > -8.0 |")
                   lines.append("| Bitrate | — | < 64 kbps |")
                   lines.append("| Sample rate | < 8000 Hz | < 16000 Hz |")
-                  lines.append("| Duration | > 20.0s or < 0.1s | — |")
+                  lines.append("| Duration | > 20.0s or < 0.1s | > 5.0s |")
                   lines.append("\n</details>\n")
 
               lines.append("")
