@@ -38,7 +38,6 @@ from collections import defaultdict
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 # BLOCK thresholds — any file hitting these blocks the entire pack.
-CLIP_BLOCK_DBTP = 1.0             # True peak >= +1.0 dBTP (audible distortion)
 LEADING_SILENCE_BLOCK_MS = 2000   # > 2 seconds of leading dead air
 TRAILING_SILENCE_BLOCK_MS = 2000  # > 2 seconds of trailing dead air
 LUFS_BLOCK_FLOOR = -70.0          # Effectively silent / broken file (-inf parses as -inf)
@@ -47,7 +46,8 @@ DURATION_MAX_BLOCK_S = 20.0      # Way too long for any CESP category
 DURATION_MIN_BLOCK_S = 0.1       # Effectively empty
 
 # WARN thresholds — file-level warnings, accumulated per pack.
-CLIP_WARN_DBTP = -0.5            # Hot signal, near clipping
+CLIP_WARN_DBTP = -0.5            # Volume is very high
+DURATION_LONG_WARN_S = 5.0       # Long for a notification sound
 LEADING_SILENCE_WARN_MS = 500    # Noticeable pause before audio starts
 TRAILING_SILENCE_WARN_MS = 500   # Noticeable dead air after audio ends
 LUFS_QUIET_WARN = -35.0          # Very quiet (un-normalized movie dialogue)
@@ -150,7 +150,7 @@ def classify_file(filepath):
 
     probe = ffprobe_info(filepath)
     if not probe:
-        blocks.append("ffprobe failed — file may be corrupt")
+        blocks.append("not a valid audio file")
         return {"file": fname, "blocks": blocks, "warns": warns, "stats": stats}
 
     duration, sample_rate, bitrate, codec = probe
@@ -165,6 +165,8 @@ def classify_file(filepath):
     # Duration
     if duration > DURATION_MAX_BLOCK_S:
         blocks.append(f"too long ({duration:.1f}s, max {DURATION_MAX_BLOCK_S:.0f}s)")
+    elif duration > DURATION_LONG_WARN_S:
+        warns.append(f"long for a notification sound ({duration:.1f}s)")
     if duration < DURATION_MIN_BLOCK_S:
         blocks.append(f"too short ({duration:.2f}s, min {DURATION_MIN_BLOCK_S}s)")
 
@@ -186,9 +188,9 @@ def classify_file(filepath):
         lead_ms = int(intervals[0][1] * 1000)
         stats["leading_silence_ms"] = lead_ms
         if lead_ms > LEADING_SILENCE_BLOCK_MS:
-            blocks.append(f"too much silence at the start ({lead_ms} ms)")
+            blocks.append(f"too much dead air at the start ({lead_ms} ms)")
         elif lead_ms > LEADING_SILENCE_WARN_MS:
-            warns.append(f"silence at the start ({lead_ms} ms)")
+            warns.append(f"dead air at the start ({lead_ms} ms)")
 
     # Trailing silence: last interval extends to EOF
     if intervals and duration > 0:
@@ -202,24 +204,22 @@ def classify_file(filepath):
             trail_ms = int((duration - last_start) * 1000)
             stats["trailing_silence_ms"] = trail_ms
             if trail_ms > TRAILING_SILENCE_BLOCK_MS:
-                blocks.append(f"too much silence at the end ({trail_ms} ms)")
+                blocks.append(f"too much dead air at the end ({trail_ms} ms)")
             elif trail_ms > TRAILING_SILENCE_WARN_MS:
-                warns.append(f"silence at the end ({trail_ms} ms)")
+                warns.append(f"dead air at the end ({trail_ms} ms)")
 
     # Loudness + peak
     tp, lufs = loudnorm_stats(filepath)
     if tp is not None:
         stats["true_peak_dbtp"] = round(tp, 1) if tp != float("-inf") else "-inf"
-        if tp >= CLIP_BLOCK_DBTP:
-            blocks.append(f"audio is distorted (clipping at +{tp:.1f} dBTP)")
-        elif tp >= CLIP_WARN_DBTP:
+        if tp >= CLIP_WARN_DBTP:
             warns.append(f"volume is very high, may sound distorted on some devices")
 
     if lufs is not None:
         stats["lufs"] = round(lufs, 1) if lufs != float("-inf") else "-inf"
         # loudnorm needs >= 400ms to compute integrated loudness (ITU-R BS.1770).
         # Files shorter than that report -inf, which is not a real silence reading.
-        if lufs == float("-inf") and duration < 0.4:
+        if lufs == float("-inf") and duration < 0.5:
             pass  # skip — too short for reliable loudness measurement
         elif lufs == float("-inf") or lufs < LUFS_BLOCK_FLOOR:
             blocks.append(f"file is silent or nearly silent")
@@ -276,7 +276,9 @@ def check_pack(pack_dir):
         }
 
     audio_files = sorted(
-        f for f in os.listdir(sounds_dir)
+        os.path.relpath(os.path.join(root, f), sounds_dir)
+        for root, _dirs, files in os.walk(sounds_dir)
+        for f in files
         if f.lower().endswith((".mp3", ".wav", ".ogg"))
     )
 
@@ -297,7 +299,8 @@ def check_pack(pack_dir):
 
     for i, fname in enumerate(audio_files):
         filepath = os.path.join(sounds_dir, fname)
-        sys.stderr.write(f"\r  [{i+1}/{len(audio_files)}] {fname[:50]:<50}")
+        display = fname[:50]
+        sys.stderr.write(f"\r  [{i+1}/{len(audio_files)}] {display:<50}")
         sys.stderr.flush()
 
         result = classify_file(filepath)
@@ -308,9 +311,9 @@ def check_pack(pack_dir):
         for b in result["blocks"]:
             if "distorted" in b:
                 block_summary["distorted"] += 1
-            elif "silence at the start" in b:
+            elif "dead air at the start" in b:
                 block_summary["silence_at_start"] += 1
-            elif "silence at the end" in b:
+            elif "dead air at the end" in b:
                 block_summary["silence_at_end"] += 1
             elif "silent or nearly silent" in b:
                 block_summary["silent"] += 1
@@ -326,9 +329,9 @@ def check_pack(pack_dir):
                 warn_summary["very_quiet"] += 1
             elif "very loud" in w:
                 warn_summary["very_loud"] += 1
-            elif "silence at the start" in w:
+            elif "dead air at the start" in w:
                 warn_summary["silence_at_start"] += 1
-            elif "silence at the end" in w:
+            elif "dead air at the end" in w:
                 warn_summary["silence_at_end"] += 1
             elif "volume is very high" in w:
                 warn_summary["high_volume"] += 1
@@ -421,10 +424,10 @@ def format_markdown(results):
         label = "GOLD — all quality checks passed"
     elif verdict == "SILVER":
         icon = ":white_check_mark:"
-        label = f"SILVER — accepted with {total_warns} warning(s)"
+        label = f"SILVER — accepted with {total_warns} {'warning' if total_warns == 1 else 'warnings'}"
     else:
         icon = ":x:"
-        label = f"REJECTED — {total_blocks} blocking issue(s) found"
+        label = f"REJECTED — {total_blocks} blocking {'issue' if total_blocks == 1 else 'issues'} found"
 
     lines.append(f"### {icon} Audio Quality: {label}\n")
     lines.append(f"**{display}** — {total_files} audio files analyzed\n")
@@ -468,13 +471,13 @@ def format_markdown(results):
     lines.append("<details><summary>Threshold reference</summary>\n")
     lines.append("| Check | Block | Warn |")
     lines.append("|---|---|---|")
-    lines.append(f"| True peak (clipping) | >= +{CLIP_BLOCK_DBTP} dBTP | >= {CLIP_WARN_DBTP:+.1f} dBTP |")
-    lines.append(f"| Leading silence | > {LEADING_SILENCE_BLOCK_MS} ms | > {LEADING_SILENCE_WARN_MS} ms |")
-    lines.append(f"| Trailing silence | > {TRAILING_SILENCE_BLOCK_MS} ms | > {TRAILING_SILENCE_WARN_MS} ms |")
+    lines.append(f"| Volume (true peak) | — | >= {CLIP_WARN_DBTP:+.1f} dBTP |")
+    lines.append(f"| Dead air at start | > {LEADING_SILENCE_BLOCK_MS} ms | > {LEADING_SILENCE_WARN_MS} ms |")
+    lines.append(f"| Dead air at end | > {TRAILING_SILENCE_BLOCK_MS} ms | > {TRAILING_SILENCE_WARN_MS} ms |")
     lines.append(f"| Loudness (LUFS) | < {LUFS_BLOCK_FLOOR} | < {LUFS_QUIET_WARN} or > {LUFS_LOUD_WARN} |")
     lines.append(f"| Bitrate | — | < {BITRATE_WARN_KBPS} kbps |")
     lines.append(f"| Sample rate | < {SAMPLE_RATE_BLOCK_HZ} Hz | < {SAMPLE_RATE_WARN_HZ} Hz |")
-    lines.append(f"| Duration | > {DURATION_MAX_BLOCK_S}s or < {DURATION_MIN_BLOCK_S}s | — |")
+    lines.append(f"| Duration | > {DURATION_MAX_BLOCK_S}s or < {DURATION_MIN_BLOCK_S}s | > {DURATION_LONG_WARN_S}s |")
     lines.append("\n</details>")
 
     return "\n".join(lines)

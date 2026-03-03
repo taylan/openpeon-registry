@@ -88,7 +88,7 @@ jobs:
                   errors.append(f'{prefix}: trust_tier \"{tier}\" not in {VALID_TIERS}')
 
           if errors:
-              print(f'Validation failed with {len(errors)} error(s):')
+              print(f'Validation failed with {len(errors)} {"error" if len(errors) == 1 else "errors"}:')
               for e in errors:
                   print(f'  - {e}')
               # Write errors for review comment
@@ -396,7 +396,7 @@ jobs:
                   print(f"  - {e}")
               sys.exit(1)
           else:
-              print(f"\nAll {len(packs)} pack(s) validated successfully")
+              print(f"\nAll {len(packs)} {'pack' if len(packs) == 1 else 'packs'} validated successfully")
           PYEOF
 
       - name: Install ffmpeg
@@ -663,10 +663,10 @@ jobs:
                       label = 'All quality checks passed'
                   elif verdict == 'SILVER':
                       qicon = ':white_check_mark:'
-                      label = f'Accepted with {nwarns} warning(s)'
+                      label = f'Accepted with {nwarns} {"warning" if nwarns == 1 else "warnings"}'
                   else:
                       qicon = ':x:'
-                      label = f'{nblocks} blocking issue(s) must be fixed'
+                      label = f'{nblocks} blocking {"issue" if nblocks == 1 else "issues"} must be fixed'
 
                   lines.append(f"#### {qicon} {qname}: {verdict}\n")
                   lines.append(f"{nfiles} audio files analyzed — **{label}**\n")
