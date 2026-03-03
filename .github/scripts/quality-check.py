@@ -424,10 +424,10 @@ def format_markdown(results):
         label = "GOLD — all quality checks passed"
     elif verdict == "SILVER":
         icon = ":white_check_mark:"
-        label = f"SILVER — accepted with {total_warns} warning(s)"
+        label = f"SILVER — accepted with {total_warns} {'warning' if total_warns == 1 else 'warnings'}"
     else:
         icon = ":x:"
-        label = f"REJECTED — {total_blocks} blocking issue(s) found"
+        label = f"REJECTED — {total_blocks} blocking {'issue' if total_blocks == 1 else 'issues'} found"
 
     lines.append(f"### {icon} Audio Quality: {label}\n")
     lines.append(f"**{display}** — {total_files} audio files analyzed\n")
