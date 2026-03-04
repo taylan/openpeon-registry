@@ -22,7 +22,7 @@ jobs:
       - name: Validate index.json schema
         id: schema
         run: |
-          python3 -c "
+          python3 << 'PYEOF'
           import json, re, sys
 
           with open('index.json') as f:
@@ -32,7 +32,7 @@ jobs:
 
           # Check version
           if data.get('version') != 1:
-              errors.append(f'version must be 1, got {data.get(\"version\")}')
+              errors.append(f'version must be 1, got {data.get("version")}')
 
           packs = data.get('packs', [])
           if not isinstance(packs, list):
@@ -59,36 +59,38 @@ jobs:
               # Required fields
               for field in REQUIRED_FIELDS:
                   if field not in pack:
-                      errors.append(f'{prefix}: missing required field \"{field}\"')
+                      errors.append(f'{prefix}: missing required field "{field}"')
 
               name = pack.get('name', '')
 
               # Name pattern
               if name and not NAME_RE.match(name):
-                  errors.append(f'{prefix}: name \"{name}\" does not match ^[a-z0-9][a-z0-9_-]{{0,63}}$')
+                  errors.append(f'{prefix}: name "{name}" does not match ^[a-z0-9][a-z0-9_-]{{0,63}}$')
 
               # Name uniqueness
               if name in seen_names:
-                  errors.append(f'{prefix}: duplicate name \"{name}\"')
+                  errors.append(f'{prefix}: duplicate name "{name}"')
               seen_names.add(name)
 
               # Alphabetical sort order
               if name and name < prev_name:
-                  errors.append(f'{prefix}: name \"{name}\" is out of alphabetical order (after \"{prev_name}\")')
+                  errors.append(f'{prefix}: name "{name}" is out of alphabetical order (after "{prev_name}")')
               prev_name = name
 
               # Version pattern
               version = pack.get('version', '')
               if version and not VERSION_RE.match(version):
-                  errors.append(f'{prefix}: version \"{version}\" does not match ^\\d+\\.\\d+\\.\\d+$')
+                  errors.append(f'{prefix}: version "{version}" does not match ^\\d+\\.\\d+\\.\\d+$')
 
               # Trust tier
               tier = pack.get('trust_tier', '')
               if tier and tier not in VALID_TIERS:
-                  errors.append(f'{prefix}: trust_tier \"{tier}\" not in {VALID_TIERS}')
+                  errors.append(f'{prefix}: trust_tier "{tier}" not in {VALID_TIERS}')
 
           if errors:
-              print(f'Validation failed with {len(errors)} {"error" if len(errors) == 1 else "errors"}:')
+              count = len(errors)
+              noun = 'error' if count == 1 else 'errors'
+              print(f'Validation failed with {count} {noun}:')
               for e in errors:
                   print(f'  - {e}')
               # Write errors for review comment
@@ -99,7 +101,7 @@ jobs:
           print(f'index.json is valid: {len(packs)} packs')
           with open('schema_errors.json', 'w') as f:
               json.dump([], f)
-          "
+          PYEOF
 
       - name: Detect new/changed packs
         id: detect
