@@ -1266,7 +1266,7 @@
       "name": "cxq-peon",
       "display_name": "Baby & Friends Sound Pack",
       "version": "1.0.0",
-      "description": "Cute notification sounds featuring Baby, Datong, and Gali for system events.",
+      "description": "Cute notification sounds featuring Baby, Datong, and Gali for system events. [coverage test]",
       "author": {
         "name": "cxq",
         "github": "cxq0101"
