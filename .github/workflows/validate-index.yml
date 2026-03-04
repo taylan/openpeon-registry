@@ -406,7 +406,7 @@ jobs:
         if: always() && steps.detect.outcome == 'success'
         run: |
           python3 << 'PYEOF'
-          import json, urllib.request, sys
+          import json, urllib.request, urllib.error, sys, time
 
           CORE_CATEGORIES = [
               'session.start', 'task.acknowledge', 'task.complete',
@@ -414,6 +414,39 @@ jobs:
           ]
           MIN_TOTAL_SOUNDS = 6
           WARN_TOTAL_SOUNDS = 12
+          MAX_MANIFEST_BYTES = 256 * 1024  # 256 KB
+          FETCH_TIMEOUT = 15
+          MAX_RETRIES = 3
+          RETRY_DELAYS = [2, 5]  # seconds between retries
+
+          def is_transient(exc):
+              """Return True for errors worth retrying."""
+              transient_types = (ConnectionResetError, ConnectionAbortedError, TimeoutError, OSError)
+              if isinstance(exc, transient_types):
+                  return True
+              if isinstance(exc, urllib.error.URLError) and not isinstance(exc, urllib.error.HTTPError):
+                  return True
+              if isinstance(exc, urllib.error.HTTPError) and exc.code >= 500:
+                  return True
+              return False
+
+          def fetch_manifest(url):
+              """Fetch manifest with retry and size cap. Returns bytes or raises."""
+              last_exc = None
+              for attempt in range(MAX_RETRIES):
+                  try:
+                      req = urllib.request.urlopen(url, timeout=FETCH_TIMEOUT)
+                      data = req.read(MAX_MANIFEST_BYTES + 1)
+                      if len(data) > MAX_MANIFEST_BYTES:
+                          raise ValueError(f"manifest exceeds {MAX_MANIFEST_BYTES // 1024} KB limit")
+                      return data
+                  except Exception as e:
+                      last_exc = e
+                      if not is_transient(e) or attempt == MAX_RETRIES - 1:
+                          raise
+                      delay = RETRY_DELAYS[min(attempt, len(RETRY_DELAYS) - 1)]
+                      print(f"  Attempt {attempt + 1} failed ({e}), retrying in {delay}s...")
+                      time.sleep(delay)
 
           with open('changed_packs.json') as f:
               packs = json.load(f)
@@ -451,8 +484,8 @@ jobs:
 
               manifest_url = f"{base}/openpeon.json"
               try:
-                  req = urllib.request.urlopen(manifest_url, timeout=15)
-                  manifest = json.loads(req.read())
+                  manifest_bytes = fetch_manifest(manifest_url)
+                  manifest = json.loads(manifest_bytes)
               except Exception as e:
                   errors.append(f"{name}: cannot fetch manifest: {e}")
                   pack_results[name] = {'pass': False, 'error': str(e)}
@@ -551,7 +584,37 @@ jobs:
         if: always() && steps.detect.outcome == 'success'
         run: |
           python3 << 'PYEOF'
-          import json, os, subprocess, sys, tarfile, tempfile, urllib.request
+          import json, os, subprocess, sys, tarfile, tempfile, time, urllib.request, urllib.error
+
+          DOWNLOAD_TIMEOUT = 60
+          MAX_RETRIES = 3
+          RETRY_DELAYS = [2, 5]  # seconds between retries
+
+          def is_transient(exc):
+              """Return True for errors worth retrying."""
+              transient_types = (ConnectionResetError, ConnectionAbortedError, TimeoutError, OSError)
+              if isinstance(exc, transient_types):
+                  return True
+              if isinstance(exc, urllib.error.URLError) and not isinstance(exc, urllib.error.HTTPError):
+                  return True
+              if isinstance(exc, urllib.error.HTTPError) and exc.code >= 500:
+                  return True
+              return False
+
+          def download_with_retry(url, dest_path):
+              """Download URL to dest_path with retry on transient errors."""
+              for attempt in range(MAX_RETRIES):
+                  try:
+                      resp = urllib.request.urlopen(url, timeout=DOWNLOAD_TIMEOUT)
+                      with open(dest_path, 'wb') as dl:
+                          dl.write(resp.read())
+                      return
+                  except Exception as e:
+                      if not is_transient(e) or attempt == MAX_RETRIES - 1:
+                          raise
+                      delay = RETRY_DELAYS[min(attempt, len(RETRY_DELAYS) - 1)]
+                      print(f"  Attempt {attempt + 1} failed ({e}), retrying in {delay}s...")
+                      time.sleep(delay)
 
           with open('changed_packs.json') as f:
               packs = json.load(f)
@@ -583,9 +646,7 @@ jobs:
               pack_dir = tempfile.mkdtemp(prefix=f"qc-{name}-")
               try:
                   tmp = tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False)
-                  resp = urllib.request.urlopen(tarball_url, timeout=60)
-                  with open(tmp.name, 'wb') as dl:
-                      dl.write(resp.read())
+                  download_with_retry(tarball_url, tmp.name)
 
                   with tarfile.open(tmp.name, "r:gz") as tf:
                       members = tf.getmembers()
