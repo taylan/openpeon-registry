@@ -1004,6 +1004,8 @@ jobs:
 
                   if not cpass:
                       lines.append("> Packs must populate all 6 core categories with at least 1 sound each, and have >= 6 total sounds.\n")
+                  elif thin:
+                      lines.append("> Pack is accepted, but please consider addressing thin categories in a future release.\n")
 
               lines.append("")
 
