@@ -3137,7 +3137,7 @@
       "name": "omar",
       "display_name": "Omar Little (The Wire)",
       "version": "1.1.1",
-      "description": "Omar comin'. Iconic Omar Little lines from The Wire.",
+      "description": "Omar comin'. Iconic Omar Little lines from The Wire. [coverage test]",
       "author": {
         "name": "Taylan Aydinli",
         "github": "taylan"
